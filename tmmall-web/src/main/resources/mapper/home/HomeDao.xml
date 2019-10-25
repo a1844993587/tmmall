@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.tmmall.dao.front.home.HomeDao">
+    <resultMap id="productProductImage" type="cn.tmmall.pojo.ProductImage">
+        <id column="piid" property="id"/>
+        <association property="product" javaType="cn.tmmall.pojo.Product">
+            <id column="pid" property="id"/>
+        </association>
+    </resultMap>
+    <resultMap id="productCategory" type="cn.tmmall.pojo.Product">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="subTitle" property="subTitle"/>
+        <result column="orignalPrice" property="orignalPrice"/>
+        <result column="promotePrice" property="promotePrice"/>
+        <result column="stock" property="stock"/>
+        <result column="createDate" property="createDate"/>
+        <association property="category" javaType="cn.tmmall.pojo.Category">
+            <id column="cid" property="id"/>
+            <result column="cname" property="name"/>
+        </association>
+    </resultMap>
+    <resultMap id="queryProduct" type="Product">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="subTitle" property="subTitle"/>
+        <result column="orignalPrice" property="orignalPrice"/>
+        <result column="promotePrice" property="promotePrice"/>
+        <result column="stock" property="stock"/>
+        <result column="createDate" property="createDate"/>
+        <association property="category" javaType="category">
+            <id column="cid" property="id"/>
+        </association>
+    </resultMap>
+
+    <select id="queryProductsByCategory" parameterType="cn.tmmall.pojo.Category" resultMap="productCategory">
+        SELECT p.*, c.name cname
+        FROM product p,
+             category c
+        WHERE cid = #{id}
+          AND cid = c.id
+    </select>
+
+    <select id="queryProductSingleImagesByProduct" parameterType="cn.tmmall.pojo.Product"
+            resultMap="productProductImage">
+        SELECT p.id pid, pi.id piid
+        FROM productimage PI,
+             product p
+        WHERE pi.pid = p.id
+          AND pi.pid = #{id}
+          AND TYPE = 'type_single'
+    </select>
+
+    <select id="queryProductById" resultMap="queryProduct" parameterType="String">
+        SELECT *
+        FROM product
+        WHERE id = #{id}
+    </select>
+
+
+</mapper>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.tmmall.dao.back.category.PropertyDao">
+    <select id="getAllProperty" resultType="Property">
+        SELECT p.id,p.cid,p.name FROM
+        property AS p JOIN category AS c ON
+        c.id=p.cid WHERE c.id=#{cid } ORDER BY p.id DESC
+    </select>
+    <insert id="addProperty">
+        INSERT INTO property (cid, name) VALUES (#{cid }, #{name })
+    </insert>
+    <select id="getPropertybyid" resultType="Property">
+      select * from property where id=#{id }
+    </select>
+    <update id="updateProperty">
+        UPDATE property SET name=#{name } WHERE id=#{id }
+    </update>
+    <delete id="deletProperty">
+        DELETE FROM property WHERE id =#{id }
+    </delete>
+    <select id="getAllPropertyNoPage" resultType="ProductValue">
+        select p.name,v.value,v.id as id1,p.id from property As p left  join propertyvalue AS v
+        on p.id = v.ptid  AND v.pid =#{pid } WHERE cid=#{cid }
+    </select>
+    <update id="updateProperyValue">
+        <foreach collection="map.keys"  item="k">
+            UPDATE propertyvalue SET value=#{map[${k}]} where id = #{k};
+        </foreach>
+    </update>
+    <select id="getPropertyBycid" resultType="Property">
+        SELECT * FROM property WHERE cid = #{cid }
+    </select>
+    <insert id="insertproductvalue">
+        INSERT INTO propertyvalue (pid, ptid, value)
+         VALUES (#{value.pid }, #{value.id}, #{value.value})
+    </insert>
+</mapper>

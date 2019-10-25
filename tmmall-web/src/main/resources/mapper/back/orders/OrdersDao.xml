@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.tmmall.dao.back.order.OrdersDao">
+  <resultMap id="userOrders" type="cn.tmmall.pojo.Orders">
+    <id property="id" column="id"/>
+    <result property="orderCode" column="orderCode"/>
+    <result property="address" column="address"/>
+    <result property="post" column="post"/>
+    <result property="receiver" column="receiver"/>
+    <result property="mobile" column="mobile"/>
+    <result property="userMessage" column="userMessage"/>
+    <result property="createDate" column="createDate"/>
+    <result property="payDate" column="payDate"/>
+    <result property="deliveryDate" column="deliveryDate"/>
+    <result property="confirmDate" column="confirmDate"/>
+    <result property="status" column="status"/>
+
+    <!--一对多-->
+    <collection property="orderItems" ofType="cn.tmmall.pojo.OrderItem" resultMap="userOrderItem"/>
+  </resultMap>
+
+  <!--关于订单项的结果集-->
+  <resultMap id="userOrderItem" type="cn.tmmall.pojo.OrderItem">
+    <result property="number" column="number"/>
+    <result property="id" column="oid"/>
+    <association property="product" resultMap="userProduct"/>
+  </resultMap>
+
+  <resultMap id="userProduct" type="cn.tmmall.pojo.Product">
+    <result property="promotePrice" column="promotePrice"/>
+  </resultMap>
+
+  <select id="findAllOrders" resultMap="userOrders">
+  SELECT
+    o.id AS id,
+    o.status AS status,
+    o.createDate AS createDate,
+    o.payDate AS payDate,
+    o.deliveryDate AS deliveryDate,
+    o.confirmDate AS confirmDate,
+    o.receiver AS receiver,
+    p.promotePrice AS promotePrice,
+    oi.number AS number,
+    oi.id AS oid
+FROM
+	orders o,
+	product p,
+	orderitem oi
+WHERE o.`id` = oi.`oid` AND oi.`pid` = p.`id`
+    ORDER BY o.createDate DESC
+  </select>
+
+  <!--根据id删除订单-->
+  <delete id="deleteOrders" parameterType="cn.tmmall.pojo.Orders">
+      DELETE FROM orders WHERE id = #{id }
+  </delete>
+
+  <!--批量删除-->
+  <delete id="deleteOrdersByids">
+    delete from orders where id in
+    <foreach collection="listid" separator="," item="ids" open="(" close=")">
+      #{ids }
+    </foreach>
+  </delete>
+</mapper>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.tmmall.dao.back.category.CategoryDao">
+    <select id="getAllCategory" resultType="Category">
+        select * from category ORDER BY id DESC
+    </select>
+    <insert id="addCategory" parameterType="Category" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO category (name) VALUES (#{name })
+    </insert>
+    <delete id="deletCategory">
+      DELETE FROM category WHERE id=#{id }
+    </delete>
+    <!--ajax获得分类信息-->
+    <select id="getcategorybyid" resultType="Category">
+        select * from category where (id=#{id })
+    </select>
+    <!--修改分类-->
+    <update id="updatecategory">
+        UPDATE category SET name=#{name } WHERE (id=#{id })
+    </update>
+    <delete id="deletCategoryByids">
+        delete from category where id in
+        <foreach collection="listid" separator="," item="ids" open="(" close=")">
+            #{ids }
+        </foreach>
+    </delete>
+</mapper>

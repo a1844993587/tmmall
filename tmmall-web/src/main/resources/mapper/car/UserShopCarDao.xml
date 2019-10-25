@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.tmmall.dao.front.car.UserShopCarDao">
+
+    <!--关于订单项的结果集-->
+    <resultMap id="userOrderItem" type="cn.tmmall.pojo.OrderItem">
+        <result property="number" column="number"/>
+        <result property="oid" column="oid"/>
+        <result property="id" column="id"/>
+        <!--一对一-->
+        <association property="product" resultMap="userProduct"/>
+    </resultMap>
+    <!--关于商品详情的结果集-->
+    <resultMap id="userProduct" type="cn.tmmall.pojo.Product">
+        <result property="id" column="pid"/>
+        <result property="name" column="name"/>
+        <result property="orignalPrice" column="orignalPrice"/>
+        <result property="promotePrice" column="promotePrice"/>
+        <!--一对一-->
+        <association property="firstProductImage" resultMap="userProductImages"/>
+    </resultMap>
+    <!--关于图片的结果集-->
+    <resultMap id="userProductImages" type="cn.tmmall.pojo.ProductImage">
+        <result property="type" column="type"/>
+        <result property="id" column="piid"/>
+    </resultMap>
+
+    <!--查询该用户的购车所有商品或者单个商品 -->
+    <select id="findAllUserShopCar" resultType="cn.tmmall.pojo.OrderItem" resultMap="userOrderItem">
+        SELECT
+		    oi.id AS id,
+            oi.number AS number,
+            p.name AS name,
+            p.orignalPrice AS orignalPrice,
+            p.promotePrice AS promotePrice,
+            p.id AS pid,
+            pi.id AS piid,
+            pi.type AS type
+        FROM
+	        orderitem oi
+	        LEFT JOIN product p ON oi.pid = p.id
+	        LEFT JOIN productimage pi ON p.id = pi.pid
+        WHERE
+	        oi.uid = #{uid}
+	        AND ISNULL(oi.oid)
+            <if test="pid != null and pid != ''">
+                AND oi.pid = ${pid}
+            </if>
+    </select>
+
+</mapper>

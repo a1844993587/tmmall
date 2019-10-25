@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.tmmall.dao.front.order.UserOrdersDao">
+
+    <!--2.0改进版本修复加入购物车一起添加问题-->
+    <!--关于订单的结果集-->
+    <resultMap id="userOrders" type="cn.tmmall.pojo.Orders">
+        <id property="id" column="id"/>
+        <result property="orderCode" column="orderCode"/>
+        <result property="address" column="address"/>
+        <result property="post" column="post"/>
+        <result property="receiver" column="receiver"/>
+        <result property="mobile" column="mobile"/>
+        <result property="userMessage" column="userMessage"/>
+        <result property="createDate" column="createDate"/>
+        <result property="payDate" column="payDate"/>
+        <result property="deliveryDate" column="deliveryDate"/>
+        <result property="confirmDate" column="confirmDate"/>
+        <result property="status" column="status"/>
+        <!--一对多-->
+        <collection property="orderItems" ofType="cn.tmmall.pojo.OrderItem" resultMap="userOrderItem"/>
+    </resultMap>
+    <!--关于订单项的结果集-->
+    <resultMap id="userOrderItem" type="cn.tmmall.pojo.OrderItem">
+        <result property="number" column="number"/>
+        <result property="oid" column="oid"/>
+        <!--一对一-->
+        <association property="product" resultMap="userProduct"/>
+    </resultMap>
+    <!--关于商品详情的结果集-->
+    <resultMap id="userProduct" type="cn.tmmall.pojo.Product">
+        <result property="id" column="pid"/>
+        <result property="name" column="name"/>
+        <result property="orignalPrice" column="orignalPrice"/>
+        <result property="promotePrice" column="promotePrice"/>
+        <!--一对一-->
+        <association property="firstProductImage" resultMap="userProductImages"/>
+    </resultMap>
+    <!--关于图片的结果集-->
+    <resultMap id="userProductImages" type="cn.tmmall.pojo.ProductImage">
+        <result property="type" column="type"/>
+        <result property="id" column="piid"/>
+    </resultMap>
+
+    <!-- 查询用户所有订单或者对应状态订单 -->
+    <select id="findAllOrders" resultMap="userOrders">
+        SELECT
+        o.id AS id, -- 订单id
+        o.ordercode AS ordercode, -- 订单号
+        o.createDate AS createDate, -- 下单时间
+        o.status AS status, -- 下单状态
+        oi.number AS number, -- 数量
+        oi.id AS oid,
+        p.id AS pid, -- 商品id
+        p.name AS name, -- 商品名称
+        p.orignalPrice AS orignalPrice, -- 商品原价
+        p.promotePrice AS promotePrice, -- 商品打折价格
+        pi.id AS piid, -- 图片id
+        pi.type AS type -- 图片类型
+        FROM
+        orders o
+        LEFT JOIN orderitem oi ON o.id = oi.oid -- 一对多
+        LEFT JOIN product p ON oi.pid = p.id -- 一对一
+        RIGHT JOIN productimage pi ON pi.pid = p.id -- 一对一
+        WHERE
+        o.uid = #{id} AND o.status != '0'
+        <if test="status != null and status != ''">
+            AND o.status = #{status}
+        </if>
+        ORDER BY o.createDate DESC
+    </select>
+
+    <!-- 根据订单id查询商品信息 -->
+    <select id="findByOrderItem" parameterType="INTEGER" resultMap="userOrders">
+        SELECT o.id           AS id,           -- 订单id
+               o.ordercode    AS ordercode,    -- 订单号
+               o.createDate   AS createDate,   -- 下单时间
+               o.status       AS status,       -- 下单状态
+               oi.number      AS number,       -- 数量
+               oi.id          AS oid,
+               p.id           AS pid,          -- 商品id
+               p.name         AS name,         -- 商品名称
+               p.orignalPrice AS orignalPrice, -- 商品原价
+               p.promotePrice AS promotePrice, -- 商品打折价格
+               pi.id          AS piid,         -- 图片id
+               pi.type        AS type,         -- 图片类型
+               o.payDate      AS payDate,      -- 支付时间
+               o.confirmDate  AS confirmDate,  -- 发货时间
+               o.post         AS post,         -- 邮编
+               o.mobile       AS mobile,       -- 电话
+               o.receiver     AS receiver,     -- 收货姓名
+               o.address      AS address -- 地址
+        FROM orders o
+                 LEFT JOIN orderitem oi ON o.id = oi.oid -- 一对多
+                 LEFT JOIN product p ON oi.pid = p.id -- 一对一
+                 RIGHT JOIN productimage pi ON pi.pid = p.id -- 一对一
+        WHERE o.id = #{id}
+    </select>
+
+    <!--根据订单id更新订单状态-->
+    <update id="updateOrderStatus" parameterType="cn.tmmall.pojo.Orders">
+        UPDATE
+        orders
+        SET
+        status = #{status}
+        <if test="payDate != null">
+            , payDate = #{payDate}
+        </if>
+        <if test="confirmDate != null">
+            , confirmDate = #{confirmDate}
+        </if>
+        <if test="deliveryDate != null">
+            , deliveryDate = #{deliveryDate}
+        </if>
+        WHERE
+        #{id} = id
+    </update>
+</mapper>

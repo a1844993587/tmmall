@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.tmmall.dao.back.category.ProductDao">
+    <select id="getAllProduct" resultType="Product">
+        SELECT p.name,p.subTitle,p.orignalPrice,
+         p.promotePrice,p.stock,p.createDate,p.id
+         FROM
+        product AS p JOIN category AS c
+        ON c.id=p.cid WHERE c.id=#{cid }
+    </select>
+    <insert id="addProduct">
+        INSERT INTO product (name, subTitle,
+        orignalPrice, promotePrice, stock, cid, createDate)
+         VALUES (#{p.name},#{p.subTitle},
+         #{p.orignalPrice},#{p.promotePrice},#{p.stock},#{p.cid},#{p.createDate})
+    </insert>
+    <select id="getProductName" resultType="Product">
+      select * from product where id = #{id }
+    </select>
+    <update id="updateProduct">
+        UPDATE product SET name=#{p1.name }, subTitle=#{p1.subTitle}, orignalPrice=#{p1.orignalPrice},
+ promotePrice=#{p1.promotePrice}, stock=#{p1.stock},createDate=#{p1.createDate } WHERE id=#{p1.id }
+    </update>
+    <delete id="deletProduct">
+        DELETE FROM product WHERE id = #{id }
+    </delete>
+</mapper>
